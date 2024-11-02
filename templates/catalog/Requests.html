@@ -1,0 +1,49 @@
+{% extends 'catalog/pattern.html' %}
+
+{% block title %}
+:))
+{% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+{% block body %}
+<h2>Назви таблиць: </h2>
+<li>catalog_fabric</li>
+<li>catalog_supplier</li>
+<li>catalog_customer</li>
+<li>catalog_item</li>
+<li>catalog_receipt</li>
+
+ <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Виконати</button>
+    </form>
+
+<h2>Результат запиту:</h2>
+{% if error_message %}
+    <p>{{ error_message }}</p>
+{% else %}
+<div class="cont">
+    <table>
+        <thead>
+            <tr>
+                {% for column in column_names %}
+                    <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result %}
+            <tr>
+                {% for value in row %}
+                <td>{{ value }}</td>
+                {% endfor %}
+    </tr>
+{% endfor %}
+        </tbody>
+    </table></div>
+{% endif %}
+
+{% endblock %}

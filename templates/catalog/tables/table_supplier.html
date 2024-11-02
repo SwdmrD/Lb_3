@@ -1,0 +1,83 @@
+{% extends 'catalog/pattern.html' %}
+{% block title %}
+Список постачальниців
+{% endblock %}
+{% block extra_css %}
+
+{% endblock %}
+{% block body %}
+<div class="row">
+            <div class="col" style="border: 3px solid #ad70c2;"><a class="p-2 text-dark" href="{% url 'lists_item' %}">Товари</a></div>
+            <div class="col" style="border: 3px solid #ad70c2;"><a class="p-2 text-dark" href="{% url 'lists_supplier' %}">Постачальники</a></div>
+            <div class="col" style="border: 3px solid #ad70c2;"><a class="p-2 text-dark" href="{% url 'lists_fabric' %}">Тканини</a></div>
+            <div class="col" style="border: 3px solid #ad70c2;"><a class="p-2 text-dark" href="{% url 'lists_customer' %}">Клієнти</a></div>
+            <div class="col" style="border: 3px solid #ad70c2;"><a class="p-2 text-dark" href="{% url 'lists_receipt' %}">Чеки</a></div>
+            </div>
+<p></p>
+<form method="get" action="{% url 'lists_supplier' %}">
+    <input type="text" name="q" placeholder="Ваш запит" style="width: 300px; height: 20px; font-size: 14px; margin-right: 5px;">
+    <button type="submit" style="font-size: 16px;">Пошук</button>
+</form>
+<div><form method="POST">
+        {% csrf_token %} {{ sort_form.as_p }}
+<input type="submit" value="Сортувати"/></form></div>
+<p>
+<a href="{% url 'new_supplier' %}">Додати постачальника</a>
+</p>
+<div class="cont">
+    <div class="row">
+        <div class="col" style="text-align: start; margin: 10px; padding: 10px; width: 250px; flex: none">
+            <a class="p-2 text-dark">
+                <form method="get" action="{% url 'lists_supplier' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Фільтрувати</button>
+                </form>
+            </a>
+        </div>
+        <div class="col" style="text-align: start; margin: 10px; padding: 10px;width: 10%;">
+            <a class="p-2 text-dark">
+                <div class="cont">
+                <table>
+    <thead>
+        <tr>
+             <th>ID</th>
+             <th>Назва компанії</th>
+             <th>Ім'я контактної персони</th>
+             <th>Прізвище контактної персони</th>
+             <th>Телефон</th>
+             <th>Місто</th>
+             <th>Пошта</th>
+             <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if suppliers %}
+        {% for supplier in suppliers %}
+            <tr>
+            <td>{{ supplier.id_supplier }}</td>
+            <td>{{ supplier.company_name }}</td>
+            <td>{{ supplier.contact_person_name }}</td>
+            <td>{{ supplier.contact_person_surname }}</td>
+            <td>{{ supplier.phone_number }}</td>
+            <td>{{ supplier.city }}</td>
+            <td>{{ supplier.email }}</td>
+            <td><a href="{% url 'edit_supplier' supplier.pk %}">Змінити</a>
+            <a href="{% url 'delete_supplier' supplier.pk %}">Видалити</a>
+            </td>
+        {% endfor %}
+    {% endif %}
+    </tbody>
+</table>
+                    </div>
+
+
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% endblock %}

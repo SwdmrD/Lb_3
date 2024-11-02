@@ -1,0 +1,9 @@
+Django==4.2.5
+asgiref==3.7.2
+pip==23.3.2
+pycparser==2.21
+pydyf==0.8.0
+pyphen==0.14.0
+pytz==2023.3.post1
+sqlparse==0.4.4
+tzdata==2023.3

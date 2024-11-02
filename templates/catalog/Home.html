@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% load static %}
+      <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script type="text/javascript" src="{% static 'scripts.js' %}"></script>
+    <title> {% block title %} {% endblock %}</title>
+    <style>
+         .container {
+            display: flex;
+            flex-direction: column;
+            color: rgb(10, 26, 84);
+
+            }
+
+          .row {
+            display: flex;
+              flex-wrap: wrap;
+              border-radius: 10px;
+          }
+
+          .col {
+            background-color: rgb(229, 220, 232);
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            margin: 5px;
+              border-radius: 10px;
+          }
+ .cont {
+    width: 100%;
+    overflow-x: auto;
+     border-radius: 10px;
+    }
+    table, td, th {
+      border-collapse: collapse;
+      border: 3px solid #245488;
+
+    }
+    td, th {
+      padding: 2px 10px;
+      text-align: center;
+    background-color: rgb(229, 220, 232);
+    }
+    th{
+    background-color: rgb(59%, 58%, 86%);
+    }
+    body{
+    background-color: rgb(70%, 66%, 72%);
+    }
+    a {
+    color: rgb(10, 26, 84);
+        text-decoration: none;
+    }
+    button{
+        border-radius: 10px;
+        border: none;
+        padding: 5px 17px;
+        background: rgb(59%, 58%, 86%);
+        font-size: 18px;
+    }
+    input{
+        padding: 5px 17px;
+        border-radius: 10px;
+         border: none;
+        font-size: 18px;
+    }
+
+    #forms{
+    display: none;
+    }
+.info-container {
+    display: none;
+}
+
+        {% block extra_css %} {% endblock %}</style>
+</head>
+<body>
+<header>
+<div class="container">
+        <div class="row">
+            <div class="col"style="padding: 0px"><a class="p-2 text-dark" href="{% url 'home' %}"><h1>БД</h1></a></div>
+        </div>
+     <div class="row"> <div class="col"><button onclick="showInfo('info1')" style="background: rgb(177,176,211); ">Авторизуватися</button></div></div>
+  </div>
+</header>
+<hr>
+
+<div id="info1" class="info-container">
+<div class="col">
+ <form id="myForm" method="post" onsubmit="return checkValue()" style="font-size: 18px;"><br>Пароль:
+    <input type="text" id="password"><br><br>
+      <button type="button" onclick="hide()" style="background: #bfbfbf;" >Скасувати дію</button>
+    <input type="submit" value="Уввійти" style="background: rgb(59%, 58%, 86%);">
+</form>
+</div>
+</div>
+
+
+<script>
+    function reg(){
+        window.location.href = "{% url 'new_customer_account' %}";
+    }
+    function login(){
+        window.location.href = "{% url 'login' %}";
+    }
+    function hide(){
+       var infoContainers = document.querySelectorAll('.info-container');
+    infoContainers.forEach(function(container) {
+      container.style.display = 'none';
+    });
+        }
+    function checkValue() {
+    var password = document.getElementById('password').value;
+    if (password === '1111') {
+        window.location.href = "{% url 'home_admin' %}";
+        return false;
+    } else {
+        alert('Невірний пароль!');
+        return false;
+    }
+}
+function showInfo(infoId) {window.location.href = "{% url 'home_admin' %}";
+  }
+
+</script>
+</body>
+</html>
