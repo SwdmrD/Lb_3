@@ -15,10 +15,6 @@
             </div>
 
 <p></p>
-<form method="get" action="{% url 'lists_receipt' %}">
-    <input type="text" name="q" placeholder="Ваш запит" style="width: 300px; height: 20px; font-size: 14px; margin-right: 5px;">
-    <button type="submit" style="font-size: 16px;">Пошук</button>
-</form>
 <div><form method="POST">
         {% csrf_token %} {{ sort_form.as_p }}
 <input type="submit" value="Сортувати"/></form></div>

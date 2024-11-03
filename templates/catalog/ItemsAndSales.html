@@ -21,7 +21,6 @@ Home
          <th>Кількість продажів</th>
          <th>Сума продажів</th>
          <th>Покупець</th>
-         <th>Дії</th>
     </tr>
 </thead>
 <tbody>
@@ -34,17 +33,13 @@ Home
         <td>{{ item.supplier }}</td>
         <td>{{ item.sales_count }}</td>
         <td>{{ item.sales_total|default_if_none:"0,0" }} грн</td>
-        <td>
+        <td style="text-align: left;">
             {% for receipt in item.receipt_set.all %}
-            {{ receipt.id_customer.customer_name }} {{ receipt.id_customer.customer_surname}} <br>
+            <li>{{ receipt.id_customer.customer_name }} {{ receipt.id_customer.customer_surname}} </li>
             {% empty %}
                 Немає продажів
             {% endfor %}
-        </td>
-
-        <td><a href="{% url 'edit_item' item.pk %}">Змінити</a>
-        <a href="{% url 'delete_item' item.pk %}">Видалити</a>
-        </td>
+        </td></td>
     </tr>
     {% endfor %}
 {% endif %}

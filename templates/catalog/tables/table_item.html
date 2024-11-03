@@ -13,10 +13,6 @@
             <div class="col" style="border: 3px solid #ad70c2;"><a class="p-2 text-dark" href="{% url 'lists_customer' %}">Клієнти</a></div>
             <div class="col" style="border: 3px solid #ad70c2;"><a class="p-2 text-dark" href="{% url 'lists_receipt' %}">Чеки</a></div></div>
 <p></p>
-<form method="get" action="{% url 'lists_item' %}">
-    <input type="text" name="q" placeholder="Ваш запит" style="width: 300px; height: 20px; font-size: 14px; margin-right: 5px;">
-    <button type="submit" style="font-size: 16px;">Пошук</button>
-</form>
 <div><form method="POST">
         {% csrf_token %} {{ sort_form.as_p }}
 <input type="submit" value="Сортувати"/></form></div>
@@ -63,7 +59,7 @@
             <td>{{ item.price }} грн</td>
             <td>{{ item.get_seasonality_display }}</td>
             <td>{{ item.brand }}</td>
-            <td>{{ item.get_size_display }}</td>
+            <td>{{ item.get_size_display.upper }}</td>
             <td>{{ item.get_gender_display }}</td>
             <td>{{ item.get_color_display }}</td>
             <td>{{ item.fabric }}</td>

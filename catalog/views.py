@@ -28,129 +28,6 @@ def sales_of_item(request):
     return render(request, 'catalog/ItemsAndSales.html', context)
 
 
-def goods(request, pk):
-    customer = get_object_or_404(Customer, pk=pk)
-    receipt = Receipt.objects.filter(id_customer=pk)
-    query = request.GET.get('q')
-    words = query.split() if query else []
-    receipt_item_ids = Receipt.objects.values('id_item')
-    items = Item.objects.exclude(id_item__in=Subquery(receipt_item_ids))
-    sort_form = SortByItem(request.POST or None)
-    form = ItemFilterForm(request.GET)
-    q_objects = Q()
-    if words:
-        search = Q()
-        for word in words:
-            search |= (
-                    Q(id_item__iregex=word) |
-                    Q(type__iregex=word) |
-                    Q(brand__iregex=word) |
-                    Q(supplier__company_name__iregex=word) |
-                    Q(fabric__fabric_name__iregex=word) |
-                    Q(size__iregex=word) |
-                    Q(gender__iregex=word) |
-                    Q(color__iregex=word) |
-                    Q(chemical_treatment__iregex=word) |
-                    Q(seasonality__iregex=word) |
-                    Q(state__iregex=word) |
-                    Q(price__iregex=word)
-
-            )
-        q_objects |= search
-    if form.is_valid():
-        brand_values = form.cleaned_data.get('brand', [])
-        size_values = form.cleaned_data.get('size', [])
-        gender_values = form.cleaned_data.get('gender', [])
-        color_values = form.cleaned_data.get('color', [])
-        fabric_values = form.cleaned_data.get('fabric', [])
-        chemical_treatment_values = form.cleaned_data.get('chemical_treatment', [])
-        state_values = form.cleaned_data.get('state', [])
-        seasonality_values = form.cleaned_data.get('seasonality', [])
-        min_price = form.cleaned_data.get('min_price')
-        max_price = form.cleaned_data.get('max_price')
-        supplier_values = form.cleaned_data.get('supplier', [])
-        filters = Q()
-        if brand_values:
-            filters &= Q(brand__in=brand_values)
-        if size_values:
-            filters &= Q(size__in=size_values)
-        if gender_values:
-            filters &= Q(gender__in=gender_values)
-        if color_values:
-            filters &= Q(color__in=color_values)
-        if fabric_values:
-            filters &= Q(fabric__in=fabric_values)
-        if chemical_treatment_values:
-            filters &= Q(chemical_treatment__in=chemical_treatment_values)
-        if state_values:
-            filters &= Q(state__in=state_values)
-        if seasonality_values:
-            filters &= Q(seasonality__in=seasonality_values)
-        if min_price is not None:
-            filters &= Q(price__gte=min_price)
-        if max_price is not None:
-            filters &= Q(price__lte=max_price)
-        if supplier_values:
-            filters &= Q(supplier__in=supplier_values)
-        q_objects &= filters
-    if sort_form.is_valid():
-        is_reversed = sort_form.cleaned_data['is_reversed']
-        if sort_form.cleaned_data['sort_by'] == 'id_item':
-            items = items.order_by(f'{"-" if is_reversed else ""}id_item')
-        if sort_form.cleaned_data['sort_by'] == 'type':
-            items = items.order_by(f'{"-" if is_reversed else ""}type')
-        if sort_form.cleaned_data['sort_by'] == 'brand':
-            items = items.order_by(f'{"-" if is_reversed else ""}brand')
-        if sort_form.cleaned_data['sort_by'] == 'size':
-            items = items.order_by(f'{"-" if is_reversed else ""}size')
-        if sort_form.cleaned_data['sort_by'] == 'gender':
-            items = items.order_by(f'{"-" if is_reversed else ""}gender')
-        if sort_form.cleaned_data['sort_by'] == 'color':
-            items = items.order_by(f'{"-" if is_reversed else ""}color')
-        if sort_form.cleaned_data['sort_by'] == 'fabric':
-            items = items.order_by(f'{"-" if is_reversed else ""}fabric')
-        if sort_form.cleaned_data['sort_by'] == 'chemical_treatment':
-            items = items.order_by(f'{"-" if is_reversed else ""}chemical_treatment')
-        if sort_form.cleaned_data['sort_by'] == 'state':
-            items = items.order_by(f'{"-" if is_reversed else ""}state')
-        if sort_form.cleaned_data['sort_by'] == 'seasonality':
-            items = items.order_by(f'{"-" if is_reversed else ""}seasonality')
-        if sort_form.cleaned_data['sort_by'] == 'price':
-            items = items.order_by(f'{"-" if is_reversed else ""}price')
-        if sort_form.cleaned_data['sort_by'] == 'supplier':
-            items = items.order_by(f'{"-" if is_reversed else ""}supplier')
-    items = items.filter(q_objects)
-    month = datetime.now().month
-    season_discounts = {
-        "Зима": ["Літо"],
-        "Весна": ["Осінь"],
-        "Літо": ["Зима"],
-        "Осінь": ["Весна"],
-        "Демісезон": ["Демісезон"]
-    }
-    current_season = "Зима" if month in {12, 1, 2} else \
-        "Весна" if month in {3, 4, 5} else \
-            "Літо" if month in {6, 7, 8} else \
-                "Осінь"
-    discount = 0.75
-    demi_discount = 0.9
-    for item in items:
-        if current_season in {"Літо", "Зима"} and item.seasonality == "Демісезон":
-            item.discounted_price = item.price * demi_discount
-        elif item.seasonality in season_discounts.get(current_season, []):
-            item.discounted_price = item.price * discount
-        else:
-            item.discounted_price = item.price
-
-    context = {'items': items,
-               'sort_form': sort_form,
-               'customer': customer,
-               'receipt': receipt,
-               'form': form,
-               'words': words}
-    return render(request, 'catalog/users_page/goods.html', context)
-
-
 def edit_request(request):
     result = ''
     error_message = None
@@ -178,31 +55,10 @@ def edit_request(request):
 
 
 def list_item(request):
-    query = request.GET.get('q')
-    words = query.split() if query else []
     items = Item.objects.all()
     sort_form = SortByItem(request.POST or None)
     form = ItemFilterForm(request.GET)
     q_objects = Q()
-    if words:
-        search = Q()
-        for word in words:
-            search |= (
-                    Q(id_item__iregex=word) |
-                    Q(type__iregex=word) |
-                    Q(brand__iregex=word) |
-                    Q(supplier__company_name__iregex=word) |
-                    Q(fabric__fabric_name__iregex=word) |
-                    Q(size__iregex=word) |
-                    Q(gender__iregex=word) |
-                    Q(color__iregex=word) |
-                    Q(chemical_treatment__iregex=word) |
-                    Q(seasonality__iregex=word) |
-                    Q(state__iregex=word) |
-                    Q(price__iregex=word)
-
-            )
-        q_objects |= search
     if form.is_valid():
         brand_values = form.cleaned_data.get('brand', [])
         size_values = form.cleaned_data.get('size', [])
@@ -266,57 +122,17 @@ def list_item(request):
         if sort_form.cleaned_data['sort_by'] == 'supplier':
             items = items.order_by(f'{"-" if is_reversed else ""}supplier')
     items = items.filter(q_objects)
-    month = datetime.now().month
-    season_discounts = {
-        "Зима": ["Літо"],
-        "Весна": ["Осінь"],
-        "Літо": ["Зима"],
-        "Осінь": ["Весна"],
-        "Демісезон": ["Демісезон"]
-    }
-    current_season = "Зима" if month in {12, 1, 2} else \
-        "Весна" if month in {3, 4, 5} else \
-            "Літо" if month in {6, 7, 8} else \
-                "Осінь"
-    discount = 0.75
-    demi_discount = 0.9
-    for item in items:
-        if current_season in {"Літо", "Зима"} and item.seasonality == "Демісезон":
-            item.discounted_price = item.price * demi_discount
-        elif item.seasonality in season_discounts.get(current_season, []):
-            item.discounted_price = item.price * discount
-        else:
-            item.discounted_price = item.price
     context = {'items': items,
                'sort_form': sort_form,
-               'form': form,
-               'words': words}
+               'form': form}
     return render(request, 'catalog/tables/table_item.html', context)
 
 
 def list_fabric(request):
-    query = request.GET.get('q')
-    words = query.split() if query else []
     fabrics = Fabric.objects.all()
     sort_form = SortByFabric(request.POST or None)
     form = FabricFilterForm(request.GET)
     q_objects = Q()
-
-    if words:
-        search = Q()
-        for word in words:
-            search |= (
-                    Q(id_fabric__iregex=word) |
-                    Q(fabric_name__iregex=word) |
-                    Q(destiny__iregex=word) |
-                    Q(elasticity__iregex=word) |
-                    Q(breathability__iregex=word) |
-                    Q(surface_texture__iregex=word) |
-                    Q(compression_resistance__iregex=word) |
-                    Q(color_fastness__iregex=word)
-            )
-        q_objects |= search
-
     if form.is_valid():
         destiny_values = form.cleaned_data.get('destiny')
         elasticity_values = form.cleaned_data.get('elasticity')
@@ -363,32 +179,15 @@ def list_fabric(request):
     fabrics = fabrics.filter(q_objects)
     context = {'fabrics': fabrics,
                'sort_form': sort_form,
-               'form': form,
-               'words': words}
+               'form': form}
     return render(request, 'catalog/tables/table_fabric.html', context)
 
 
 def list_supplier(request):
-    query = request.GET.get('q')
-    words = query.split() if query else []
     suppliers = Supplier.objects.all()
     sort_form = SortBySupplier(request.POST or None)
     form = SupplierFilterForm(request.GET)
     q_objects = Q()
-    if words:
-        search = Q()
-        for word in words:
-            search |= (
-                    Q(id_supplier__iregex=word) |
-                    Q(company_name__iregex=word) |
-                    Q(contact_person_name__iregex=word) |
-                    Q(contact_person_surname__iregex=word) |
-                    Q(phone_number__iregex=word) |
-                    Q(city__iregex=word) |
-                    Q(email__iregex=word)
-            )
-        q_objects |= search
-
     if form.is_valid():
         contact_person_name_values = form.cleaned_data.get('contact_person_name', [])
         contact_person_surname_values = form.cleaned_data.get('contact_person_surname', [])
@@ -426,36 +225,15 @@ def list_supplier(request):
     suppliers = suppliers.filter(q_objects)
     context = {'suppliers': suppliers,
                'sort_form': sort_form,
-               'form': form,
-               'words': words}
+               'form': form}
     return render(request, 'catalog/tables/table_supplier.html', context)
 
 
 def list_customer(request):
-    query = request.GET.get('q')
-    words = query.split() if query else []
     customers = Customer.objects.all()
     sort_form = SortByCustomer(request.POST or None)
     form = CustomerFilterForm(request.GET)
     q_objects = Q()
-    if words:
-        search = Q()
-        for word in words:
-            search |= (
-                    Q(id_customer__iregex=word) |
-                    Q(customer_name__iregex=word) |
-                    Q(customer_surname__iregex=word) |
-                    Q(customer_middle_name__iregex=word) |
-                    Q(customer_city__iregex=word) |
-                    Q(customer_address__iregex=word) |
-                    Q(customer_number_of_house__iregex=word) |
-                    Q(customer_phone_number__iregex=word) |
-                    Q(customer_email__iregex=word) |
-                    Q(customer_passport_code__iregex=word) |
-                    Q(customer_password__iregex=word) |
-                    Q(customer_credit_card__iregex=word)
-            )
-        q_objects |= search
     if form.is_valid():
         customer_name_values = form.cleaned_data.get('customer_name', [])
         customer_surname_values = form.cleaned_data.get('customer_surname', [])
@@ -526,31 +304,15 @@ def list_customer(request):
     customers = customers.filter(q_objects)
     context = {'customers': customers,
                'sort_form': sort_form,
-               'form': form,
-               'words': words}
+               'form': form}
     return render(request, 'catalog/tables/table_customer.html', context)
 
 
 def list_receipt(request):
-    query = request.GET.get('q')
-    words = query.split() if query else []
     receipts = Receipt.objects.all()
     sort_form = SortByReceipt(request.POST or None)
     form = ReceiptFilterForm(request.GET)
     q_objects = Q()
-    if words:
-        search = Q()
-        for word in words:
-            search |= (
-                    Q(id_item__type__iregex=word) |
-                    Q(id_customer__customer_name__iregex=word) |
-                    Q(id_customer__customer_surname__iregex=word) |
-                    Q(the_item_cost__iregex=word) |
-                    Q(method_of_delivery__iregex=word) |
-                    Q(payment_type__iregex=word)
-            )
-        q_objects |= search
-
     if form.is_valid():
         id_item_values = form.cleaned_data.get('id_item', [])
         id_customer_values = form.cleaned_data.get('id_customer', [])
@@ -596,8 +358,7 @@ def list_receipt(request):
     receipts = receipts.filter(q_objects)
     context = {'receipts': receipts,
                'sort_form': sort_form,
-               'form': form,
-               'words': words}
+               'form': form}
     return render(request, 'catalog/tables/table_receipt.html', context)
 
 
