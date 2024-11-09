@@ -76,15 +76,16 @@
 </head>
 <body>
 <header>
+  <br>
+  <br>
+  <br>
 <div class="container">
+            
         <div class="row">
-            <div class="col"style="padding: 0px"><a class="p-2 text-dark"><h1>СТОРІНКА АДМІНІСТРУВАННЯ</h1><h3 style="text-align: center"></h3></a></div>
-        </div>
-        <div class="row">
-            <div class="col"><a class="p-2 text-dark" href="{% url 'lists_item' %}">Таблиці</a></div>
-            <div class="col"><a class="p-2 text-dark" href="{% url 'edit_request' %}">Редактор запитів</a></div>
-            <div class="col"><a class="p-2 text-dark" href="{% url 'statistics' %}">Статистики</a></div>
-            <div class="col"><a class="p-2 text-dark" href="{% url 'sales' %}">Товар та його продажі</a></div>
+           <div class="col"><a class="p-2 text-dark" href="{% url 'home' %}">Пов'язана таблиця</a></div>
+           <div class="col"><a class="p-2 text-dark" href="{% url 'new_item' %}">Процедура на створення нового запису</a></div> 
+           <div class="col"><a class="p-2 text-dark" href="{% url 'scalar_function' %}">Скалярна функція</a></div>
+            <div class="col"><a class="p-2 text-dark" href="{% url 'table_function' %}">Таблична функція</a></div>
         </div>
   </div>
 </header>
