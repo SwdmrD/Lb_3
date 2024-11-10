@@ -1,51 +1,19 @@
 {% extends 'catalog/pattern.html' %}
 
 {% block title %}
-:))
+Скалярна функція
 {% endblock %}
+
 {% block extra_css %}
 {% endblock %}
 
 {% block body %}
 <div class="cont">
   <div class="row">
-  
-      <table>
-          <thead>
-              <tr>
-                  <th>ID</th>
-                  <th>Назва</th>
-                  <th>Ціна</th>
-                  <th>Постачальник</th>
-                  <th>Кількість проданих речей</th>
-                  <th>Сума продажів</th>
-                  <th>Продажі</th>
-              </tr>
-          </thead>
-          <tbody>
-              {% if items %}
-                  {% for item in items %}
-                      <tr>
-                     
-                          <td>{{ item.id_item }}</td>
-                          <td>{{ item.type }}</td>
-                          <td>{{ item.price }}</td>
-                          <td>{{ item.supplier }}</td>
-                          <td>{{ item.SALES_COUNT }}</td>
-                          <td>{{ item.SALES_TOTAL|default_if_none:"0,0" }}</td>
-                          <td style="text-align: left;">
-                              {% for receipt in item.receipt_set.all %}
-                                  <li>{{ receipt.id_customer.customer_name }} {{ receipt.id_customer.customer_surname }}</li>
-                              {% empty %}
-                                  Немає продажів
-                              {% endfor %}
-                          </td>
-                      </tr>
-                  {% endfor %}
-              {% endif %}
-          </tbody>
-      </table>
-  
+ <br>
+  Кількість товарів, ціна яких менша за середню вартість:  {% if result %} {{ result}} {% endif %}
+</div>
+  </div>
   </div>
 
 {% endblock %}

@@ -1,16 +1,6 @@
-import os
-from datetime import date, timedelta
-
 from django.contrib import messages
 from django.db import connection
-from django.db.models import Avg, Count, Max, Min, Q, Subquery, Sum
-from django.db.utils import OperationalError
-from django.http import Http404, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import get_template
-from django.urls import reverse
-from django.views.generic import CreateView, DeleteView
-from django.views.generic.edit import UpdateView
+from django.shortcuts import redirect, render
 from django.db import connection
 from django.shortcuts import render
 
@@ -104,48 +94,33 @@ def table_function(request):
 
 
 def scalar_function(request):
-    return render(request, 'catalog/table.html')
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT  dbo.LESS_THAN_AVG();")
+        result = cursor.fetchone() #повертає кортеж, тому для результату треба використати перше значення
+    return render(request, 'catalog/scalar_function.html', {'result':result[0]}) 
 
 
-def statistics(request):
-    # Середня ціна речей кожного бренду
-    average_price_per_brand = Item.objects.values('brand').annotate(average_price=Avg('price'))
-    # Кількість речей кожного бренду
-    count_per_brand = Item.objects.values('brand').annotate(count=Count('id_item'))
-    # Кількість речей за кожним постачальником
-    count_per_supplier = Item.objects.values('supplier__company_name').annotate(count=Count('id_item'))
-    # Середня ціна речей кожного постачальника
-    average_price_per_supplier = Item.objects.values('supplier__company_name').annotate(average_price=Avg('price'))
-    # Постачальники, у яких найбільше поставок
-    most_deliveries = count_per_supplier.aggregate(Max('count'))['count__max']
-    most_deliveries_suppliers = count_per_supplier.filter(count=most_deliveries)
-    # Постачальники, у яких найменше поставок
-    least_deliveries = count_per_supplier.aggregate(Min('count'))['count__min']
-    least_deliveries_suppliers = count_per_supplier.filter(count=least_deliveries)
-    # сума кожного чека
-    start_of_last_week = datetime.now() - timedelta(days=datetime.now().weekday() + 7)
-    end_of_last_week = start_of_last_week + timedelta(days=6)
-    receipt_totals = Receipt.objects.filter(date_of_purchase__range=[start_of_last_week, end_of_last_week]).values(
-        'number_of_receipt').annotate(total=Sum('the_item_cost'))
-    # Найбільший чек
-    biggest_receipt =receipt_totals.aggregate(Max('total'))['total__max']
-    biggest_receipts = receipt_totals.filter(total=biggest_receipt)
-    # Найменший чек
-    smallest_receipt = receipt_totals.aggregate(Min('total'))['total__min']
-    smallest_receipts = receipt_totals.filter(total=smallest_receipt)
-    # Середня вартість товарів кожного типу тканини
-    average_price_per_fabric_type = Item.objects.values('fabric__fabric_name').annotate(average_price=Avg('price'))
+def update_item__price_procedure(id_item, price):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            EXEC UpdatePrice
+                @id = %s, 
+                @Price = %s;
+        """, [id_item, price])
 
-    context = {'average_price_per_brand': average_price_per_brand,
-               'count_per_brand': count_per_brand,
-               'count_per_supplier': count_per_supplier,
-               'average_price_per_supplier': average_price_per_supplier,
-               'most_deliveries_suppliers': most_deliveries_suppliers,
-               'least_deliveries_suppliers': least_deliveries_suppliers,
-               'biggest_receipts': biggest_receipts,
-               'smallest_receipt': smallest_receipt,
-               'smallest_receipts': smallest_receipts,
-               'average_price_per_fabric_type': average_price_per_fabric_type,
-               'receipt_totals': receipt_totals,
-               }
-    return render(request, 'catalog/Statistics.html', context)
+
+def exception(request):
+    if request.method == 'POST':
+        form = UpdatePriceForm(request.POST)
+        if form.is_valid():
+            id_item = form.cleaned_data['id_item']
+            price = form.cleaned_data['price']
+            try:
+                update_item__price_procedure(id_item, price)
+                messages.success(request, 'Ціна успішно оновлена!')
+                redirect('home')
+            except Exception as e:
+                messages.error(request, f'Помилка: {str(e)}')
+    else:
+        form = UpdatePriceForm()
+    return render(request, 'catalog/exception.html', {'form': form})

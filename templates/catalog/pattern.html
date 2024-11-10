@@ -80,14 +80,16 @@
   <br>
   <br>
 <div class="container">
-            
         <div class="row">
            <div class="col"><a class="p-2 text-dark" href="{% url 'home' %}">Пов'язана таблиця</a></div>
            <div class="col"><a class="p-2 text-dark" href="{% url 'new_item' %}">Процедура на створення нового запису</a></div> 
            <div class="col"><a class="p-2 text-dark" href="{% url 'scalar_function' %}">Скалярна функція</a></div>
             <div class="col"><a class="p-2 text-dark" href="{% url 'table_function' %}">Таблична функція</a></div>
-        </div>
+            <div class="col"><a class="p-2 text-dark" href="{% url 'exception' %}">Виклик виключення</a></div>
+            <div class="col"><a class="p-2 text-dark" href="http://127.0.0.1:8000/admin/">Адміністрування</a></div>
+          </div>
   </div>
+  <br>
 </header>
 {% block body %} {% endblock %}
 </body>
