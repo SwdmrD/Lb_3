@@ -120,7 +120,9 @@ def exception(request):
                 messages.success(request, 'Ціна успішно оновлена!')
                 redirect('home')
             except Exception as e:
-                messages.error(request, f'Помилка: {str(e)}')
+                clean_message = str(e).split(']')[-1].strip()
+                clean_message = clean_message.split('(')[0].strip()
+                messages.error(request, f'Помилка: {clean_message}')
     else:
         form = UpdatePriceForm()
     return render(request, 'catalog/exception.html', {'form': form})
